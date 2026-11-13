@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Three Hearts One Destiny</title>
+  <style>
+    :root {
+      --wa-bg: #0b141a;
+      --wa-header: #202c33;
+      --wa-panel: #111b21;
+      --wa-incoming: #202c33;
+      --wa-outgoing: #005c4b;
+      --wa-green: #00a884;
+      --wa-text: #e9edef;
+      --wa-muted: #8696a0;
+      --wa-border: #2a3942;
+      --wa-blue-tick: #53bdeb;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #090e11;
+      color: var(--wa-text);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .wa-container {
+      width: 100%;
+      max-width: 820px;
+      height: 100vh;
+      max-height: 920px;
+      background-color: var(--wa-bg);
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--wa-border);
+      border-right: 1px solid var(--wa-border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Join Modal Overlay */
+    #join-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(11, 20, 26, 0.96);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .join-card {
+      background-color: var(--wa-header);
+      border: 1px solid var(--wa-border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 390px;
+      text-align: center;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .join-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00a884, #005c4b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 14px;
+    }
+
+    .join-card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 6px;
+      color: var(--wa-text);
+    }
+
+    .join-card p {
+      font-size: 0.84rem;
+      color: var(--wa-muted);
+      margin-bottom: 18px;
+      line-height: 1.4;
+    }
+
+    .join-card input {
+      width: 100%;
+      background-color: #2a3942;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--wa-text);
+      font-size: 1rem;
+      text-align: center;
+      outline: none;
+      margin-bottom: 10px;
+    }
+
+    .join-card input:focus {
+      border-color: var(--wa-green);
+    }
+
+    .join-error {
+      color: #f15c6d;
+      font-size: 0.78rem;
+      min-height: 18px;
+      margin-bottom: 10px;
+    }
+
+    .join-card button {
+      width: 100%;
+      background-color: var(--wa-green);
+      color: #0b141a;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .join-card button:hover {
+      background-color: #06cf9c;
+    }
+
+    /* Top WhatsApp Group Header */
+    .wa-header {
+      background-color: var(--wa-header);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--wa-border);
+      z-index: 10;
+    }
+
+    .group-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .group-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00a884, #005c4b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .group-title h1 {
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: var(--wa-text);
+    }
+
+    .group-subtitle {
+      font-size: 0.78rem;
+      color: var(--wa-muted);
+      margin-top: 2px;
+    }
+
+    .my-badge {
+      background-color: rgba(0, 168, 132, 0.15);
+      color: #00a884;
+      border: 1px solid rgba(0, 168, 132, 0.35);
+      padding: 5px 11px;
+      border-radius: 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    /* Rules Banner */
+    .wa-banner {
+      background-color: #182229;
+      color: #ffd279;
+      font-size: 0.76rem;
+      text-align: center;
+      padding: 8px 14px;
+      margin: 10px auto 6px;
+      border-radius: 8px;
+      max-width: 92%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    /* Date Divider Pill */
+    .date-divider {
+      align-self: center;
+      background-color: #182229;
+      color: var(--wa-muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      padding: 5px 12px;
+      border-radius: 8px;
+      margin: 10px 0 6px;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+      text-transform: uppercase;
+    }
+
+    /* Chat Area */
+    #chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+      background-size: 24px 24px;
+      scroll-behavior: smooth;
+    }
+
+    #chat-box::-webkit-scrollbar { width: 6px; }
+    #chat-box::-webkit-scrollbar-thumb { background: rgba(134, 150, 160, 0.3); border-radius: 3px; }
+
+    .msg-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      max-width: 82%;
+      margin-bottom: 2px;
+    }
+
+    .msg-row.mine {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .msg-row.theirs {
+      align-self: flex-start;
+    }
+
+    .member-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #0b141a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    .bubble {
+      padding: 7px 10px 7px 11px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      line-height: 1.4;
+      word-wrap: break-word;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+      position: relative;
+      min-width: 85px;
+    }
+
+    .mine .bubble {
+      background-color: var(--wa-outgoing);
+      color: var(--wa-text);
+      border-top-right-radius: 0;
+    }
+
+    .theirs .bubble {
+      background-color: var(--wa-incoming);
+      color: var(--wa-text);
+      border-top-left-radius: 0;
+    }
+
+    .sender-name {
+      font-size: 0.76rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+      display: block;
+    }
+
+    .msg-footer {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      margin-top: 3px;
+      float: right;
+      margin-left: 10px;
+    }
+
+    .msg-time {
+      font-size: 0.67rem;
+      color: rgba(233, 237, 239, 0.65);
+    }
+
+    .ticks {
+      font-size: 0.74rem;
+      font-weight: bold;
+      letter-spacing: -2px;
+      color: rgba(233, 237, 239, 0.55);
+      transition: color 0.2s;
+    }
+
+    .ticks.seen {
+      color: var(--wa-blue-tick);
+    }
+
+    .system-pill {
+      align-self: center;
+      background-color: #182229;
+      color: var(--wa-muted);
+      font-size: 0.74rem;
+      padding: 5px 12px;
+      border-radius: 8px;
+      margin: 5px 0;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    }
+
+    /* Emoji Picker Drawer */
+    #emoji-picker {
+      display: none;
+      background-color: var(--wa-header);
+      border-top: 1px solid var(--wa-border);
+      padding: 10px 14px;
+      max-height: 180px;
+      overflow-y: auto;
+      grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+      gap: 6px;
+    }
+
+    #emoji-picker.open {
+      display: grid;
+    }
+
+    .emoji-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.35rem;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .emoji-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Bottom Input Bar */
+    .wa-input-bar {
+      background-color: var(--wa-header);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--wa-muted);
+      font-size: 1.45rem;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-btn:hover:not(:disabled) {
+      color: var(--wa-text);
+    }
+
+    #msg-input {
+      flex: 1;
+      background-color: #2a3942;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 15px;
+      color: var(--wa-text);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    #msg-input::placeholder {
+      color: var(--wa-muted);
+    }
+
+    .send-btn {
+      background-color: var(--wa-green);
+      color: #0b141a;
+      border: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      background-color: #06cf9c;
+    }
+
+    .send-btn:disabled, #msg-input:disabled, .icon-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .banned-box {
+      margin: auto;
+      background-color: #2c1418;
+      border: 1px solid #f15c6d;
+      color: #ffb4bd;
+      padding: 24px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .banned-box h2 {
+      margin-bottom: 8px;
+      color: #f15c6d;
+    }
+  </style>
+</head>
+<body>
+  <div class="wa-container">
+    <!-- Name / Initials Prompt Modal -->
+    <div id="join-overlay">
+      <div class="join-card">
+        <div class="join-avatar">💖</div>
+        <h2>Three Hearts One Destiny</h2>
+        <p>Enter your name or initials so members know who is speaking in the group.</p>
+        <form id="join-form">
+          <input id="name-input" type="text" placeholder="e.g. Siva or Tushar or Music" maxlength="18" autocomplete="off" required />
+          <div class="join-error" id="join-error"></div>
+          <button type="submit">Join Group Chat</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="wa-header">
+      <div class="group-info">
+        <div class="group-avatar">💖</div>
+        <div class="group-title">
+          <h1>Three Hearts One Destiny</h1>
+          <div class="group-subtitle" id="online-status">connecting...</div>
+        </div>
+      </div>
+      <div class="my-badge" id="badge">Guest</div>
+    </div>
+
+    <!-- Chat Messages -->
+    <div id="chat-box">
+      <div class="wa-banner">
+        🔒 Private DMs are disabled. Sending any numbers (digits or words like "one", "seven hundred"), emails, links, or social media IDs results in an instant permanent ban.
+      </div>
+    </div>
+
+    <!-- Emoji Picker -->
+    <div id="emoji-picker"></div>
+
+    <!-- Bottom Composer -->
+    <form class="wa-input-bar" id="chat-form">
+      <button type="button" class="icon-btn" id="emoji-toggle" title="Emojis">😊</button>
+      <input id="msg-input" type="text" placeholder="Type a message (no numbers or social IDs)" autocomplete="off" required />
+      <button type="submit" class="send-btn" id="send-btn" title="Send">➤</button>
+    </form>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const joinOverlay = document.getElementById('join-overlay');
+    const joinForm = document.getElementById('join-form');
+    const nameInput = document.getElementById('name-input');
+    const joinError = document.getElementById('join-error');
+
+    const chatBox = document.getElementById('chat-box');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('msg-input');
+    const sendBtn = document.getElementById('send-btn');
+    const badge = document.getElementById('badge');
+    const onlineStatus = document.getElementById('online-status');
+    const emojiToggle = document.getElementById('emoji-toggle');
+    const emojiPicker = document.getElementById('emoji-picker');
+
+    const LOCAL_STORAGE_KEY = 'thod_local_messages_v2';
+    const SAVED_NAME_KEY = 'thod_user_name';
+    let myName = localStorage.getItem(SAVED_NAME_KEY) || '';
+    let lastRenderedDateLabel = '';
+
+    if (myName) {
+      nameInput.value = myName;
+    }
+
+    const NAME_COLORS = ['#53bdeb', '#ff8a8c', '#a5b4fc', '#facc15', '#4ade80', '#f472b6', '#fb923c', '#38bdf8'];
+    function getUserColor(username) {
+      let hash = 0;
+      for (let i = 0; i < username.length; i++) {
+        hash = username.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return NAME_COLORS[Math.abs(hash) % NAME_COLORS.length];
+    }
+
+    function getInitials(name) {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return name.slice(0, 2).toUpperCase();
+    }
+
+    function formatDateDivider(isoString) {
+      const date = isoString ? new Date(isoString) : new Date();
+      if (isNaN(date.getTime())) return 'TODAY';
+
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterdayStart = new Date(todayStart);
+      yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+      const msgDayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+      if (msgDayStart.getTime() === todayStart.getTime()) return 'TODAY';
+      if (msgDayStart.getTime() === yesterdayStart.getTime()) return 'YESTERDAY';
+
+      return date.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function formatMessageTime(isoString) {
+      const date = isoString ? new Date(isoString) : new Date();
+      if (isNaN(date.getTime())) return '';
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    const EMOJIS = [
+      '😀','😂','🥰','😍','😊','😘','🥺','😭','😎','🤩',
+      '🥳','🤔','🤗','🤭','🤫','🙄','😴','🤯','😱','😤',
+      '❤️','💖','💕','💞','💓','💗','💘','💝','💔','✨',
+      '🔥','🌹','🌸','🦋','🌙','⭐','🌈','☀️','🎉','🥂',
+      '👍','👎','👏','🙌','🤝','🙏','✌️','🤞','🫶','👀'
+    ];
+    EMOJIS.forEach(emoji => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'emoji-btn';
+      btn.textContent = emoji;
+      btn.onclick = () => {
+        input.value += emoji;
+        input.focus();
+      };
+      emojiPicker.appendChild(btn);
+    });
+
+    emojiToggle.addEventListener('click', () => {
+      emojiPicker.classList.toggle('open');
+    });
+
+    function getSavedLocalMessages() {
+      try {
+        return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveMessageLocally(msgObj) {
+      const existing = getSavedLocalMessages();
+      const idx = existing.findIndex(m => m.id === msgObj.id);
+      if (idx === -1) {
+        existing.push(msgObj);
+        if (existing.length > 300) existing.shift();
+      } else {
+        existing[idx] = { ...existing[idx], ...msgObj };
+      }
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(existing));
+    }
+
+    function updateTickElement(msgId, status, seenBy) {
+      const tickEl = document.getElementById(`ticks-${msgId}`);
+      if (!tickEl) return;
+      const isSeen = status === 'seen' || (Array.isArray(seenBy) && seenBy.length > 1);
+      if (isSeen) {
+        tickEl.textContent = '✓✓';
+        tickEl.classList.add('seen');
+        const readers = Array.isArray(seenBy) ? seenBy.filter(u => u !== myName) : [];
+        if (readers.length > 0) {
+          tickEl.title = `Seen by ${readers.join(', ')}`;
+        }
+      } else if (status === 'delivered') {
+        tickEl.textContent = '✓✓';
+        tickEl.classList.remove('seen');
+      } else {
+        tickEl.textContent = '✓';
+        tickEl.classList.remove('seen');
+      }
+    }
+
+    function renderMessage(data) {
+      if (data.id && document.getElementById(`msg-${data.id}`)) {
+        updateTickElement(data.id, data.status, data.seenBy);
+        return;
+      }
+
+      const dateLabel = formatDateDivider(data.timestamp);
+      if (dateLabel !== lastRenderedDateLabel) {
+        const divider = document.createElement('div');
+        divider.className = 'date-divider';
+        divider.textContent = dateLabel;
+        chatBox.appendChild(divider);
+        lastRenderedDateLabel = dateLabel;
+      }
+
+      const isMine = data.user === myName;
+      const row = document.createElement('div');
+      if (data.id) row.id = `msg-${data.id}`;
+      row.className = `msg-row ${isMine ? 'mine' : 'theirs'}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'member-avatar';
+      avatar.style.backgroundColor = getUserColor(data.user);
+      avatar.textContent = getInitials(data.user);
+      avatar.title = data.user;
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+
+      if (!isMine) {
+        const sender = document.createElement('span');
+        sender.className = 'sender-name';
+        sender.style.color = getUserColor(data.user);
+        sender.textContent = data.user;
+        bubble.appendChild(sender);
+      }
+
+      const textSpan = document.createElement('span');
+      textSpan.textContent = data.text;
+      bubble.appendChild(textSpan);
+
+      const footer = document.createElement('span');
+      footer.className = 'msg-footer';
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'msg-time';
+      timeSpan.textContent = formatMessageTime(data.timestamp);
+      footer.appendChild(timeSpan);
+
+      if (isMine) {
+        const ticksSpan = document.createElement('span');
+        ticksSpan.className = 'ticks';
+        ticksSpan.id = `ticks-${data.id}`;
+        footer.appendChild(ticksSpan);
+      }
+
+      bubble.appendChild(footer);
+      row.appendChild(avatar);
+      row.appendChild(bubble);
+      chatBox.appendChild(row);
+
+      if (isMine) {
+        updateTickElement(data.id, data.status, data.seenBy);
+      }
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function lockScreenAsBanned(reason) {
+      localStorage.setItem('thod_banned', 'true');
+      joinOverlay.style.display = 'none';
+      badge.textContent = 'Banned';
+      badge.style.color = '#f15c6d';
+      onlineStatus.textContent = 'Access revoked';
+      input.disabled = true;
+      sendBtn.disabled = true;
+      emojiToggle.disabled = true;
+      emojiPicker.classList.remove('open');
+      chatBox.innerHTML = `
+        <div class="banned-box">
+          <h2>Permanent Ban</h2>
+          <p>${reason}</p>
+        </div>
+      `;
+    }
+
+    if (localStorage.getItem('thod_banned') === 'true') {
+      lockScreenAsBanned('Your access to Three Hearts One Destiny has been permanently revoked.');
+    } else {
+      const socket = io();
+
+      function acknowledgeSeenMessages(msgList) {
+        if (document.hidden || !myName) return;
+        const unseenIds = msgList
+          .filter(m => m.user !== myName && (!Array.isArray(m.seenBy) || !m.seenBy.includes(myName)))
+          .map(m => m.id);
+        if (unseenIds.length > 0) {
+          socket.emit('mark_seen', unseenIds);
+        }
+      }
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          acknowledgeSeenMessages(getSavedLocalMessages());
+        }
+      });
+
+      joinForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const enteredName = nameInput.value.trim();
+        if (!enteredName) return;
+        joinError.textContent = '';
+        socket.emit('join_with_name', enteredName);
+      });
+
+      socket.on('name_error', (errMsg) => {
+        joinError.textContent = errMsg;
+      });
+
+      socket.on('join_accepted', ({ name, history }) => {
+        myName = name;
+        localStorage.setItem(SAVED_NAME_KEY, name);
+        badge.textContent = name;
+        joinOverlay.style.display = 'none';
+
+        const localMsgs = getSavedLocalMessages();
+        const combinedMap = new Map();
+        [...localMsgs, ...history].forEach(m => {
+          const prev = combinedMap.get(m.id);
+          combinedMap.set(m.id, prev ? { ...prev, ...m } : m);
+        });
+
+        const mergedList = Array.from(combinedMap.values()).sort(
+          (a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0)
+        );
+
+        mergedList.forEach(m => {
+          saveMessageLocally(m);
+          renderMessage(m);
+        });
+
+        acknowledgeSeenMessages(mergedList);
+        input.focus();
+      });
+
+      socket.on('online_count', (count) => {
+        onlineStatus.textContent = `${count} member${count === 1 ? '' : 's'} online`;
+      });
+
+      socket.on('system_message', (text) => {
+        const div = document.createElement('div');
+        div.className = 'system-pill';
+        div.textContent = text;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+
+      socket.on('permanent_ban', (reason) => {
+        lockScreenAsBanned(reason);
+      });
+
+      socket.on('group_message', (data) => {
+        saveMessageLocally(data);
+        renderMessage(data);
+        if (data.user !== myName) {
+          acknowledgeSeenMessages([data]);
+        }
+      });
+
+      socket.on('messages_seen_update', ({ messageIds, seenByUser }) => {
+        const saved = getSavedLocalMessages();
+        messageIds.forEach(id => {
+          const item = saved.find(m => m.id === id);
+          if (item) {
+            if (!Array.isArray(item.seenBy)) item.seenBy = [item.user];
+            if (!item.seenBy.includes(seenByUser)) item.seenBy.push(seenByUser);
+            item.status = 'seen';
+            saveMessageLocally(item);
+            updateTickElement(id, 'seen', item.seenBy);
+          }
+        });
+      });
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (input.value.trim()) {
+          socket.emit('group_message', input.value);
+          input.value = '';
+          emojiPicker.classList.remove('open');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

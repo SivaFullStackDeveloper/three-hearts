@@ -1,0 +1,13 @@
+{
+  "name": "three-hearts-one-destiny",
+  "version": "1.4.0",
+  "description": "WhatsApp-style anonymous group chat blocking all numbers (digits, number words, hundreds/thousands/lakhs/crores, Roman numerals, Hindi/regional number words), social media, and emails with permanent IP ban.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
